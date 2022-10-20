@@ -28,4 +28,3 @@ crackmap exec
 unzip
 
 differnce between /etc/hosts/ and /etc/resolv.conf
-

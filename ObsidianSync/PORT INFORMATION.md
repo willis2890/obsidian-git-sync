@@ -1,3 +1,6 @@
+53 UDP/TCP: 
+Can attempt dig to resolve hostnames
+
 135/TCP MSRPC
 RPC Endpoint Mapper Service: allows other systems to discover what services are advertised on a machine and what port to find them on
 
@@ -5,10 +8,7 @@ RPC Endpoint Mapper Service: allows other systems to discover what services are 
 NetBIOS Session Service connects two computer for transmitting heavy data traffic (mostly used for printer and file services)
 
 
-53 UDP/TCP: 
-Can attempt dig to resolve hostnames
-
-445 TCP: 
+445 TCP/Microsoft-ds: 
 Can attempt smbclient to attempt to list shares (will be listed as microsoft-ds)
 
 can use RPC to attempt to enumerate users

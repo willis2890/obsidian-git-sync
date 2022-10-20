@@ -2,6 +2,9 @@ crack a password, include file, format, and wordlist (use --show)
 
 `john JohnHash.hash --format=NT --wordlist=/usr/share/wordlists/rockyou.txt --show`
 
+can also
+`john --wordlist=[wordlist] [hash] --show`
+
 
 CYBERCHEF: CHECKS HASH PROBABILITY
 [cyberchef](https://gchq.github.io/CyberChef/)

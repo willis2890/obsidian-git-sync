@@ -1,4 +1,4 @@
-# LINUX (resolv.conf)
+sys# LINUX (resolv.conf)
 The three main configuration directives in resolv.conf
 nameserver # DNS Server IP
 	points to the IP address of a Name Server (only 3 can be listed)
